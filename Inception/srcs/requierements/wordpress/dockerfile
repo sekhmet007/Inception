@@ -1,0 +1,24 @@
+FROM debian:buster
+
+# Mise à jour et installation des paquets nécessaires
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y wget php7.3 php-fpm php-mysql mariadb-client
+
+# Téléchargement et installation de WordPress
+RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www/ && \
+    cd /var/www && tar -xzf wordpress-6.0-fr_FR.tar.gz && \
+    rm wordpress-6.0-fr_FR.tar.gz && \
+    chown -R www-data:www-data /var/www/wordpress
+
+# Installation de WP-CLI pour PHP-FPM
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+# Copie du script d'initialisation
+COPY ./conf/auto_config.sh /usr/local/bin/auto_config.sh
+RUN chmod +x /usr/local/bin/auto_config.sh
+
+# Démarrage de PHP-FPM
+ENTRYPOINT ["/usr/local/bin/auto_config.sh"]
+CMD ["/usr/sbin/php-fpm7.3", "-F"]

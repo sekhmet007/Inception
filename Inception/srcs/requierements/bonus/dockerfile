@@ -1,0 +1,8 @@
+# Utiliser l'image officielle de Redis comme base
+FROM redis:latest
+
+# Copier le fichier de configuration personnalisé
+COPY redis.conf /usr/local/etc/redis/redis.conf
+
+# Indiquer à Redis d'utiliser le fichier de configuration personnalisé
+CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]

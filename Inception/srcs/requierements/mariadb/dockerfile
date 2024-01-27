@@ -1,0 +1,24 @@
+# Utiliser Debian Buster comme base
+FROM debian:buster
+
+# Mettre à jour les paquets et installer MariaDB
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y mariadb-server
+
+# Copier le fichier de configuration personnalisé
+COPY conf/50-server.conf /etc/mysql/mariadb.conf.d/50-server.conf
+
+# Script pour initialiser la base de données et l'utilisateur
+COPY init_db.sh /usr/local/bin/init_db.sh
+RUN chmod +x /usr/local/bin/init_db.sh
+
+RUN mkdir -p /var/log/mysql
+RUN chown -R mysql:mysql /var/log/mysql
+
+RUN ln -sf /dev/stdout /var/log/mysql/general.log \
+ && ln -sf /dev/stderr /var/log/mysql/error.log
+
+# Exécuter le script d'initialisation au démarrage du conteneur
+CMD ["init_db.sh"]
+
