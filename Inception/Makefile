@@ -13,12 +13,12 @@ create-volumes:
 # Commande pour démarrer les services avec docker-compose
 up:
 	@echo "Démarrage des conteneurs..."
-	docker-compose -f ./srcs/docker-compose.yml up -d --build
+	docker compose -f ./srcs/docker-compose.yml up -d --build
 
 # Commande pour arrêter et supprimer les conteneurs, réseaux, volumes et images créés par 'up'
 down:
 	@echo "Arrêt des conteneurs et nettoyage..."
-	docker-compose -f ./srcs/docker-compose.yml down
+	docker compose -f ./srcs/docker-compose.yml down
 
 # Commande pour reconstruire et redémarrer les conteneurs
 re: down up
