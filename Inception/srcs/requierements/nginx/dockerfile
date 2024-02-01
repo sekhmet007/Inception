@@ -1,5 +1,5 @@
 # Utiliser la version pénultième stable de Debian (comme suggéré dans votre tutoriel)
-FROM debian:buster
+FROM debian:bullseye
 
 # Mettre à jour les paquets et installer NGINX et OpenSSL
 RUN apt-get update && \

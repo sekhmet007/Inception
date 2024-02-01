@@ -42,7 +42,7 @@ services:
       - mariadb
     restart: always
     expose: 
-      - "9000"
+      - "9000:9000"
 
   redis:
     container_name: redis

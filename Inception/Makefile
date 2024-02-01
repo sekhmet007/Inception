@@ -1,32 +1,25 @@
-# Définition des chemins pour les volumes
-WP_VOLUME_PATH := /home/ecullier/data/wordpress
-DB_VOLUME_PATH := /home/ecullier/data/mariadb
+all:
+	@docker compose -f ./srcs/docker-compose.yml up -d --build
 
-all: create-volumes up
-
-# Commande pour créer les répertoires des volumes s'ils n'existent pas
-create-volumes:
-	@echo "Création des répertoires pour les volumes..."
-	mkdir -p $(WP_VOLUME_PATH)
-	mkdir -p $(DB_VOLUME_PATH)
-
-# Commande pour démarrer les services avec docker-compose
-up:
-	@echo "Démarrage des conteneurs..."
-	docker compose -f ./srcs/docker-compose.yml up -d --build
-
-# Commande pour arrêter et supprimer les conteneurs, réseaux, volumes et images créés par 'up'
 down:
-	@echo "Arrêt des conteneurs et nettoyage..."
-	docker compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./srcs/docker-compose.yml down
 
-# Commande pour reconstruire et redémarrer les conteneurs
-re: down up
+stop:
+	@docker stop $$(docker ps -qa)
 
-# Commande pour nettoyer l'environnement Docker et supprimer les répertoires des volumes
-clean: down
-	@echo "Suppression des répertoires des volumes..."
-	rm -rf $(WP_VOLUME_PATH)
-	rm -rf $(DB_VOLUME_PATH)
+re:
+	@docker compose -f ./srcs/docker-compose.yml up -d --build
 
-.PHONY: all create-volumes up down re clean
+clean:
+	@docker stop $$(docker ps -qa);\
+	docker rm $$(docker ps -qa);\
+	docker rmi -f $$(docker images -qa);\
+	docker network rm $$(docker network ls -q);\
+	docker system prune -a --force
+
+fclean: clean
+	@docker volume rm $$(docker volume ls -q);\
+	sudo rm -rf /home/vfuster-/data/mysql/*;\
+	sudo rm -rf /home/vfuster-/data/wordpress/*;
+
+.PHONY: all re down stop clean fclea
