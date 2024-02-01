@@ -22,6 +22,6 @@ RUN ln -sf /dev/stdout /var/log/mysql/general.log \
  && ln -sf /dev/stderr /var/log/mysql/error.log
 
 # Exécuter le script d'initialisation au démarrage du conteneur
-ENTRYPOINT [ "docker-entrypoint.sd" ]
+ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD ["mysql"]
 
