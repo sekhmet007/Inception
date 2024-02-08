@@ -1,0 +1,36 @@
+FROM debian:bullseye
+
+# Mise à jour des paquets et installation des prérequis
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y wget lsb-release ca-certificates apt-transport-https software-properties-common gnupg2
+
+# Ajout du dépôt sury pour PHP
+RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
+    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
+    apt-get update
+
+# Installation de PHP 8.1 et des extensions nécessaires
+RUN apt-get install -y php8.1 php8.1-fpm php8.1-mysql mariadb-client
+
+# Copie de la configuration personnalisée de PHP-FPM
+COPY ./conf/www.conf /etc/php/8.1/fpm/pool.d/
+
+# Téléchargement et installation de WordPress
+RUN wget https://fr.wordpress.org/latest-fr_FR.tar.gz -P /var/www/ && \
+    tar -xzf /var/www/latest-fr_FR.tar.gz -C /var/www/ && \
+    rm /var/www/latest-fr_FR.tar.gz && \
+    chown -R www-data:www-data /var/www/wordpress && \
+    chmod -R 777 /var/www/wordpress
+
+# Installation de WP-CLI
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -P /usr/local/bin/ && \
+    chmod +x /usr/local/bin/wp-cli.phar && \
+    mv /usr/local/bin/wp-cli.phar /usr/local/bin/wp
+
+# Copie du script d'initialisation
+COPY ./tools/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Démarrage de PHP-FPM
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["php-fpm8.1", "-F"]
