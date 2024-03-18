@@ -1,0 +1,70 @@
+services:
+
+    nginx:
+        depends_on:
+            - wordpress
+        container_name: nginx
+        build:
+            context: requirements/nginx
+            dockerfile: Dockerfile
+        ports:
+            - "443:443"
+        networks:
+            - inception_network
+        volumes:
+            - inception_wordpress:/var/www/wordpress
+
+    wordpress:
+        depends_on:
+            - mariadb
+        container_name: wordpress
+        build: requirements/wordpress
+        env_file: .env
+        ports:
+            - "9000:9000"
+        networks:
+            - inception_network
+        volumes:
+            - inception_wordpress:/var/www/wordpress
+
+    mariadb:
+        container_name: mariadb
+        build: requirements/mariadb
+        env_file: .env
+        ports:
+            - "3306:3306"
+        networks:
+            - inception_network
+        volumes:
+            - inception_db:/var/lib/mysql
+
+    redis:
+        container_name: redis
+        build: ./requirements/bonus/redis/.
+        image: redis
+        volumes:
+            - inception_wordpress:/var/www/wordpress
+        depends_on:
+            - wordpress
+        networks:
+            - inception_network
+        restart: always
+
+volumes:
+    inception_wordpress:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/ecullier/data/wordpress
+            o: bind
+    inception_db:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/ecullier/data/mysql
+            o: bind
+
+networks:
+    inception_network:
+        driver: bridge
+        external: false
